@@ -25,18 +25,30 @@ func GetLogGroups(cfg *config.Cfg, filter string) []string {
 		prefixFilter = nil
 	}
 
-	response, err := client.DescribeLogGroups(context.TODO(), &cloudwatchlogs.DescribeLogGroupsInput{
-		LogGroupNamePrefix: prefixFilter,
-	})
-
-	if err != nil {
-		panic("Failed to get log groups, " + err.Error())
-	}
-
 	logGroups := []string{}
 
-	for _, logGroup := range response.LogGroups {
-		logGroups = append(logGroups, string(*logGroup.LogGroupArn))
+	for {
+
+		var nextToken *string
+
+		response, err := client.DescribeLogGroups(context.TODO(), &cloudwatchlogs.DescribeLogGroupsInput{
+			LogGroupNamePrefix: prefixFilter,
+			NextToken:          nextToken,
+		})
+
+		if err != nil {
+			panic("Failed to get log groups, " + err.Error())
+		}
+
+		for _, logGroup := range response.LogGroups {
+			logGroups = append(logGroups, string(*logGroup.LogGroupArn))
+		}
+
+		if response.NextToken == nil {
+			break
+		}
+
+		nextToken = response.NextToken
 	}
 
 	return logGroups
