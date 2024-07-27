@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"go-cw-live/internal/adapter/config"
 	"go-cw-live/internal/adapter/logs"
+	"os"
 	"strings"
 
 	"github.com/manifoldco/promptui"
@@ -38,8 +40,8 @@ func main() {
 	logGroups := logs.GetLogGroups(cfg, filter)
 
 	if len(logGroups) == 0 {
-		panic("No log groups found")
-
+		fmt.Println("No groups logs")
+		os.Exit(1)
 	}
 
 	promptLogGroup := promptui.Select{
